@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	mtx "github.com/bluenviron/mediamtx/core"
@@ -531,6 +532,13 @@ func (s *Streamer) screengrabSegment(segment []byte) {
 		"-f",
 		"image2pipe",
 		"-")
+
+	// Only hide window on Windows
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			HideWindow: true,
+		}
+	}
 
 	var stdinPipe, stderrPipe bytes.Buffer
 	cmd.Stdin = &stdinPipe
