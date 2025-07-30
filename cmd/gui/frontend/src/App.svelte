@@ -80,6 +80,11 @@
           }, 0);
         }
         break;
+      case "SEASON_POINTS":
+        try {
+          seasonPoints = JSON.parse(JSON.parse(data.data)).totalPoints;
+        } catch (error) {}
+        break;
       default:
         console.log(data);
         break;
@@ -99,6 +104,8 @@
 
   let messages = [];
   const maxMessages = 100;
+
+  let seasonPoints = "Loading...";
 
   // Scroll ref
   let messageEndRef;
@@ -292,6 +299,7 @@
           <p><strong>Wallet:</strong><br /> <code>{nknStatus.wallet}</code></p>
         </div>
       </div>
+      <h6>Season Points: {seasonPoints}</h6>
 
       <hr />
 

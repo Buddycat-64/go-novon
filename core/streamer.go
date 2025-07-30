@@ -174,6 +174,37 @@ func (s *Streamer) Start() error {
 	s.receiveMessages(ctx)
 	s.reportNumClients(ctx)
 
+	//TEMP CODE FOR SEASON 2
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				log.Println("GetPoints: stopping")
+				return
+			default:
+				// Create the message
+				getTotalPointsMessage := GetTotalPointsMessage{
+					Type:      "get_total_points",
+					Timestamp: time.Now().UnixMilli(), // equivalent to Date.now()
+				}
+
+				// Convert to JSON
+				messageJSON, err := json.Marshal(getTotalPointsMessage)
+				if err != nil {
+					// handle error
+					panic(err)
+				}
+
+				// Send the message (assuming you have a client with a Send method)
+				s.nknClient.SendText(nkn.NewStringArrayFromString("50000f2c6c8f1bedb037b99adff9df67d6d00c818c326e6e72af0779bf5e6879"),
+					string(messageJSON), &nkn.MessageConfig{
+						NoReply: true,
+					})
+				time.Sleep(time.Second * 5)
+			}
+		}
+	}()
+
 	go func() {
 		s.mtxCore.Wait()
 		log.Println("mtxCore awaited")
@@ -261,6 +292,7 @@ func (s *Streamer) createClient() *nkn.MultiClient {
 		MultiClientOriginalClient: false,
 		ConnectRetries:            10,
 		AllowUnencrypted:          true,
+		//WebRTC:                    true,
 	})
 
 	//5% startup connection leniency, improves startup time dramatically with minimal risk for service disruption.

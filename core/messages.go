@@ -31,7 +31,9 @@ func (s *Streamer) DecodeMessage(receivedMessage *nkn.Message) {
 	// Unmarshal the JSON into a Message struct
 	var msg Message
 	if err := json.Unmarshal(receivedMessage.Data, &msg); err != nil {
-		fmt.Println("Error deserializing JSON:", err)
+		s.EmitEvent("SEASON_POINTS", map[string]string{
+			"data": string(receivedMessage.Data[:]),
+		})
 		return
 	}
 
@@ -57,6 +59,20 @@ func (s *Streamer) DecodeMessage(receivedMessage *nkn.Message) {
 
 				s.publishText(string(receivedMessage.Data))
 			}
+		}
+	case "total_points_response":
+		{
+			fullContentMap := map[string]string{}
+			if err := json.Unmarshal(msg.Content, &fullContentMap); err != nil {
+				fmt.Println("Unknown message type:", msg.Type, "content:", string(msg.Content))
+				return
+			}
+			payload := map[string]string{
+				"Type":        "SEASON_POINTS",
+				"TotalPoints": fullContentMap["totalPoints"],
+			}
+			s.EventHandler.Emit(payload)
+			return
 		}
 	default:
 		fmt.Println("Unknown message type:", msg.Type, "content:", string(msg.Content))
