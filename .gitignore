@@ -24,3 +24,6 @@ mediamtx.yml
 screenshot.jpg
 panels.json
 cmd/gui/config.json
+
+.idea/
+gonovon

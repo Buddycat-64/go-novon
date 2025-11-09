@@ -14,7 +14,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	mtx "github.com/bluenviron/mediamtx/core"
@@ -565,13 +564,7 @@ func (s *Streamer) screengrabSegment(segment []byte) {
 		"image2pipe",
 		"-")
 
-	// Only hide window on Windows
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			CreationFlags: 0x08000000,
-			HideWindow:    true,
-		}
-	}
+	applyProcAttrs(cmd)
 
 	var stdinPipe, stderrPipe bytes.Buffer
 	cmd.Stdin = &stdinPipe
@@ -608,13 +601,7 @@ func (s *Streamer) resizeSegment(transcode Transcode, segment []byte) []byte {
 		"-f", "mpegts",
 		"-")
 
-	// Only hide window on Windows
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			CreationFlags: 0x08000000,
-			HideWindow:    true,
-		}
-	}
+	applyProcAttrs(cmd)
 
 	var stdinPipe, stderrPipe bytes.Buffer
 	cmd.Stdin = &stdinPipe
@@ -638,13 +625,7 @@ func (s *Streamer) probeVideoInfo(segment []byte) (map[string]string, error) {
 	// Create ffprobe command with pipe input
 	cmd := exec.Command("ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", "-i", "-")
 
-	// Only hide window on Windows
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			CreationFlags: 0x08000000,
-			HideWindow:    true,
-		}
-	}
+	applyProcAttrs(cmd)
 
 	var stdinPipe bytes.Buffer
 	cmd.Stdin = &stdinPipe
@@ -691,13 +672,7 @@ func checkFfmpegInstalled() bool {
 	// Command to check for ffmpeg (replace with actual command if needed)
 	cmd := exec.Command("ffmpeg", "-version")
 
-	// Only hide window on Windows
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			CreationFlags: 0x08000000,
-			HideWindow:    true,
-		}
-	}
+	applyProcAttrs(cmd)
 
 	err := cmd.Run()
 	if err != nil {

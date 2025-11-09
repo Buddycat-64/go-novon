@@ -19,7 +19,7 @@ A decentralised video streaming host client to stream RTMP to novon
 # Building from source
 
 1) install the latest go
-2) build the app: ```go build```
+2) build the app: ```go build -o ./gonovon ./cmd/cli```
 3) run ```./gonovon```
 
 # Video bitrate, codecs, encoding configuration
