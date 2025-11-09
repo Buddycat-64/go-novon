@@ -121,9 +121,8 @@ func (s *Streamer) sendToClient(address string, data []byte) {
 
 	for i := 0; i < VIEWER_SUB_CLIENTS; i++ {
 		go s.getNextClient().SendPayload(nkn.NewStringArray("__"+strconv.Itoa(i)+"__."+address), msgPayload, &nkn.MessageConfig{
-			Unencrypted:       true,
-			NoReply:           true,
-			MaxHoldingSeconds: 0,
+			Unencrypted: true,
+			NoReply:     true,
 		})
 	}
 }
@@ -136,9 +135,8 @@ func (s *Streamer) reply(data []byte, msg *nkn.Message) {
 
 	for i := 0; i < VIEWER_SUB_CLIENTS; i++ {
 		go s.getNextClient().SendPayload(nkn.NewStringArray("__"+strconv.Itoa(i)+"__."+msg.Src), payload, &nkn.MessageConfig{
-			Unencrypted:       true,
-			NoReply:           true,
-			MaxHoldingSeconds: 0,
+			Unencrypted: true,
+			NoReply:     true,
 		})
 	}
 }
@@ -151,9 +149,8 @@ func (s *Streamer) replyText(text string, msg *nkn.Message) {
 
 	for i := 0; i < VIEWER_SUB_CLIENTS; i++ {
 		go s.getNextClient().SendPayload(nkn.NewStringArray("__"+strconv.Itoa(i)+"__."+msg.Src), payload, &nkn.MessageConfig{
-			Unencrypted:       true,
-			NoReply:           true,
-			MaxHoldingSeconds: 0,
+			Unencrypted: true,
+			NoReply:     true,
 		})
 	}
 }
