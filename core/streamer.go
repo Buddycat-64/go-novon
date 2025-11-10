@@ -289,7 +289,6 @@ func (s *Streamer) createClient() *nkn.MultiClient {
 		log.Panic(err)
 	}
 
-	client, _ := nkn.NewMultiClientV2(account, "", &nkn.ClientConfig{
 		MultiClientNumClients:     NUM_SUB_CLIENTS,
 		MultiClientOriginalClient: false,
 		ConnectRetries:            10,
