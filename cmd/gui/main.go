@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "Novon",
+		Title:  "GoNovon 0.4.0",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
