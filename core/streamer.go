@@ -21,8 +21,9 @@ import (
 )
 
 var segmentSendConfig = &nkn.MessageConfig{
-	Unencrypted: true,
-	NoReply:     true,
+	Unencrypted:       true,
+	NoReply:           true,
+	MaxHoldingSeconds: 0,
 }
 
 type Streamer struct {
@@ -44,6 +45,7 @@ type Streamer struct {
 	thumbnail        []byte
 	config           *Config
 	segmentId        int
+	sessionId        uint32
 }
 
 func NewStreamer() *Streamer {
@@ -172,6 +174,7 @@ func (s *Streamer) Start() error {
 	s.maintainStream(ctx)
 	s.receiveMessages(ctx)
 	s.reportNumClients(ctx)
+	s.sessionId = GetSessionID()
 
 	//TEMP CODE FOR SEASON 2
 	go func() {
@@ -286,7 +289,6 @@ func (s *Streamer) createClient() *nkn.MultiClient {
 		log.Panic(err)
 	}
 
-	client, _ := nkn.NewMultiClientV2(account, "", &nkn.ClientConfig{
 		MultiClientNumClients:     NUM_SUB_CLIENTS,
 		MultiClientOriginalClient: false,
 		ConnectRetries:            10,
@@ -431,30 +433,45 @@ func (s *Streamer) maintainStream(ctx context.Context) {
 	}()
 }
 
+// GetSessionID returns the number of seconds since 2025-01-01 UTC.
+func GetSessionID() uint32 {
+	// Define your epoch start (2025-01-01 00:00:00 UTC)
+	epoch := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	// Get current UTC time
+	now := time.Now().UTC()
+
+	// Compute seconds since that epoch
+	diff := now.Sub(epoch).Seconds()
+
+	return uint32(diff)
+}
+
 func (s *Streamer) ChunkByByteSizeWithMetadata(data []byte, chunkSize int, segmentId int) [][]byte {
 	if chunkSize <= 0 {
 		panic("chunkSize must be positive")
 	}
 
-	totalChunks := (len(data) / chunkSize) + 1
+	// assuming you have sessionId (uint32) and chunkSize defined
+	totalChunks := (len(data) + chunkSize - 1) / chunkSize // safer rounding
 	chunks := make([][]byte, 0, totalChunks)
 
-	chunkId := 0
-
 	buffer := bytes.NewBuffer(data)
-	for {
+	for chunkId := 0; ; chunkId++ {
 		chunk := buffer.Next(chunkSize)
 		if len(chunk) == 0 {
 			break
 		}
 
-		prefix := make([]byte, 3*4)
-		binary.LittleEndian.PutUint32(prefix[:4], uint32(segmentId))
-		binary.LittleEndian.PutUint32(prefix[4:8], uint32(chunkId))
-		binary.LittleEndian.PutUint32(prefix[8:], uint32(totalChunks))
+		// 5 * 4 = 20 bytes header
+		prefix := make([]byte, 5*4)
+		binary.LittleEndian.PutUint32(prefix[0:4], s.sessionId)
+		binary.LittleEndian.PutUint32(prefix[4:8], uint32(segmentId))
+		binary.LittleEndian.PutUint32(prefix[8:12], uint32(chunkId))
+		binary.LittleEndian.PutUint32(prefix[12:16], uint32(totalChunks))
+		binary.LittleEndian.PutUint32(prefix[16:20], uint32(chunkSize))
 
 		chunks = append(chunks, append(prefix, chunk...))
-		chunkId++
 	}
 
 	return chunks
