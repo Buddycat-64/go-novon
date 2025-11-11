@@ -62,7 +62,7 @@ First you will want to install OBS studio for your platform (https://obsproject.
 Then you will want to configure OBS as shown above
 (you will also want to add "Display Capture" as a source on OBS to actually record your screen)
 
-Then Download the GoNovon .EXE from the releases (or build it yourself)
+Then Download the GoNovon .EXE from the releases (or build it yourself using the instructions above)
 
 Run the binary (.exe) and hit "Start GoNovon"
 <img width="1010" height="741" alt="Start Novon" src="https://github.com/user-attachments/assets/8fcdb8eb-3a87-4d2e-942d-d7a2ef7d453b" />
